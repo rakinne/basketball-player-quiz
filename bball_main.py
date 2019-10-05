@@ -1,9 +1,15 @@
 from random import choice
 from bball_class import BasketballIndex
+from bball_scrape import scap_players
+import os
 
 url = 'https://www.basketball-reference.com'
 bball = BasketballIndex(url)
-csv_path = '/Users/rakinnefoote/Desktop/PythonProjects/bball_player_information.csv'
+csv_path = './all_bball_players.csv'
+
+if not os.path.isfile(csv_path):
+	scap_players(csv_path)
+
 player_list = bball.make_list(csv_path)
 
 user_name = input("What's your name? \n")
@@ -15,6 +21,7 @@ def choose_player(players):
 won = False
 lost = False
 new_player = True
+
 while True:
 	if won:
 		replay = input("Would you like to play again? (y/n) \n")
@@ -52,7 +59,7 @@ while True:
 	plyr_height = bball.player_height(url2)
 	plyr_num = bball.player_number(url2)
 
-	user_guess = input(f"Who plays/played for {plyr_nba} as a {plyr_pos}? ... ")
+	user_guess = input(f"Who plays/played for {plyr_nba} as a {plyr_pos}? ... \n")
 
 
 	while True:

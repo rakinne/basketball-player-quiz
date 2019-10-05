@@ -3,28 +3,33 @@ from csv import writer
 from time import sleep
 from string import ascii_lowercase
 import requests
+from unidecode import unidecode
 
-with open("all_bball_players.csv", 'w') as f:
-	csv_writer = writer(f)
-	csv_writer.writerow(["Player, Position, Link"])
+def scap_players(file_to_save):
 
-
-for letter in ascii_lowercase:
-	print(f"Now scraping players with last name '{letter.upper()}' ...")
-	url = 'https://www.basketball-reference.com/players/' + letter
-	page = requests.get(url)
-	if page.status_code == 404:
-		continue
-	soup = BeautifulSoup(page.text, "html.parser")
-	table_row = soup.find("tbody")
+	with open(file_to_save, 'w', newline='') as f:
+		csv_writer = writer(f)
+		csv_writer.writerow(["Player, Position, Link"])
 
 
-	with open("all_bball_players.csv", 'a') as file:
-		csv_writer = writer(file)
+	for letter in ascii_lowercase:
+		print(f"Now scraping players with last name '{letter.upper()}' ...")
+		url = 'https://www.basketball-reference.com/players/' + letter
+		page = requests.get(url)
 		
-		for bold in table_row.find_all("strong"):
-			player_url = bold.find("a")["href"]
-			player = bold.get_text()
-			player_position = bold.find('td', {'td': 'pos'})
-			csv_writer.writerow([player, player_position, player_url])
-	sleep(3)
+		if page.status_code == 404:
+			continue
+		
+		soup = BeautifulSoup(page.text.encode('utf-8'), "html.parser")
+		table_row = soup.find("tbody")
+
+		with open(file_to_save, 'a', newline='') as file:
+			csv_writer = writer(file)
+			
+			for tr in table_row.find_all("tr"):
+				player = unidecode(tr.find("th").get_text())
+				player_url = tr.find("a")['href']
+				position = tr.find("td", {"data-stat":"pos"}).get_text()
+				csv_writer.writerow([player, player_url, position])
+
+		sleep(3)
